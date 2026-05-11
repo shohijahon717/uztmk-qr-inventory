@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}Bosh sahifa - UZTMK{% endblock %}
+
+{% block content %}
+<div class="row align-items-center min-vh-content">
+    <!-- Hero Section -->
+    <div class="col-lg-6 mb-4 mb-lg-0">
+        <div class="hero-content">
+            <h1 class="display-4 fw-bold text-primary mb-3">
+                O'zbekiston Texnologik Metallar Kombinati Inventar tizimi
+            </h1>
+            <p class="lead text-secondary mb-4">
+                O'zbekiston Texnologik Metallar Kombinatidagi IT qurilmalarni inventarizatsiya qilish, xodimlarga topshirish, QR kod orqali tezkor tekshirish va ombor nazoratini yuritish uchun mo‘ljallangan zamonaviy tizim.
+               </p>
+            
+            <div class="d-flex gap-3 mb-4">
+                <a href="/dashboard/" class="btn btn-primary btn-lg">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+                <a href="/devices/" class="btn btn-outline-primary btn-lg">
+                    <i class="bi bi-cpu"></i> Qurilmalar
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features -->
+    <div class="col-lg-6">
+        <div class="row g-3">
+            <!-- Feature 1 -->
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100 feature-card">
+                    <div class="card-body text-center">
+                        <div class="feature-icon mb-3">
+                            <i class="bi bi-cpu"></i>
+                        </div>
+                        <h5 class="card-title">Qurilmalar</h5>
+                        <p class="card-text text-muted">
+                            Barcha kompyuterlar va texnologiyalarni boshqaring
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature 2 -->
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100 feature-card">
+                    <div class="card-body text-center">
+                        <div class="feature-icon mb-3">
+                            <i class="bi bi-person-check"></i>
+                        </div>
+                        <h5 class="card-title">Xodimlar</h5>
+                        <p class="card-text text-muted">
+                            Xodimlarni va ularning tayinlanishlarini kuzating
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature 3 -->
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100 feature-card">
+                    <div class="card-body text-center">
+                        <div class="feature-icon mb-3">
+                            <i class="bi bi-qr-code"></i>
+                        </div>
+                        <h5 class="card-title">QR Kodlar</h5>
+                        <p class="card-text text-muted">
+                            Tez va oson ma'lumot olish uchun QR kodlardan foydalaning
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature 4 -->
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100 feature-card">
+                    <div class="card-body text-center">
+                        <div class="feature-icon mb-3">
+                            <i class="bi bi-file-earmark-excel"></i>
+                        </div>
+                        <h5 class="card-title">Eksport</h5>
+                        <p class="card-text text-muted">
+                            Ma'lumotlarni Excel formatida yuklang
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Section -->
+<section class="mt-5 pt-5 border-top">
+    <div class="row text-center">
+        <div class="col-md-4 mb-4">
+            <div class="stat-box">
+                <h3 class="text-primary fw-bold">100+</h3>
+                <p class="text-muted">Qurilmalar</p>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="stat-box">
+                <h3 class="text-success fw-bold">50+</h3>
+                <p class="text-muted">Xodimlar</p>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="stat-box">
+                <h3 class="text-info fw-bold">24/7</h3>
+                <p class="text-muted">Mavjud</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

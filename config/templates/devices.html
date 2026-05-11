@@ -1,0 +1,331 @@
+{% extends 'base.html' %}
+
+{% block title %}Barcha Qurilmalar - UZTMK{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="display-5 fw-bold">
+        <i class="bi bi-cpu"></i> Qurilmalar
+    </h1>
+    <p class="text-muted">Kompaniyaning barcha qurilmalari va ularning ma'lumotlari</p>
+</div>
+
+<!-- Search -->
+<div class="row mb-4">
+    <div class="col-12 col-md-8">
+        <input 
+            type="text" 
+            class="form-control form-control-lg" 
+            id="searchInput" 
+            placeholder="Nomi, Inventar raqam yoki Serial raqam bo'yicha qidirish..."
+        >
+    </div>
+</div>
+
+<!-- Qurilmalar Soni -->
+<div class="mb-3">
+    <p class="text-muted">
+        Jami: <strong id="totalCount">0</strong> qurilma
+        <span id="filterCount" class="ms-3"></span>
+    </p>
+</div>
+
+<!-- Qurilmalar Jadvali -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-light py-3 border-bottom">
+                <h5 class="mb-0 fw-bold">
+                    <i class="bi bi-table"></i> Qurilmalar Ro'yxati
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="loadingSpinner" class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Yuklanyapti...</span>
+                    </div>
+                </div>
+
+                <div id="tableContainer" style="display: none;">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Inventar Raqam</th>
+                                    <th>Nomi</th>
+                                    <th>Turi</th>
+                                    <th>Serial Raqam</th>
+                                    <th>Model</th>
+                                    <th>Holati</th>
+                                    <th>Narxi</th>
+                                    <th>Amallar</th>
+                                </tr>
+                            </thead>
+                            <tbody id="devicesTableBody">
+                                <!-- JS bilan to'ldiriladi -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="noData" style="display: none;">
+                    <div class="alert alert-info" role="alert">
+                        <i class="bi bi-info-circle"></i> 
+                        Qurilma topilmadi
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Qurilmalar Grid Viewi -->
+<div class="mb-4">
+    <div class="mb-3">
+        <button class="btn btn-outline-secondary" id="toggleView">
+            <i class="bi bi-columns-gap"></i> Grid Ko'rinishi
+        </button>
+    </div>
+    
+    <div id="gridContainer" class="row g-3" style="display: none;">
+        <!-- JS bilan to'ldiriladi -->
+    </div>
+</div>
+
+<script>
+// Ma'lumotlarni o'z ichiga olgan global o'zgaruvchi
+let allDevices = [];
+
+// Sahifa yuklanganda
+document.addEventListener('DOMContentLoaded', function() {
+    loadDevices();
+    setupEventListeners();
+});
+
+// Qurilmalarni API dan yuklash
+function loadDevices() {
+    fetch('/api/devices/')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('API xatosi');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // DRF Pagination support
+            if (data.results) {
+                allDevices = data.results;
+            } else if (Array.isArray(data)) {
+                allDevices = data;
+            } else {
+                allDevices = [];
+            }
+            
+            displayDevices(allDevices);
+            updateCounts();
+        })
+        .catch(error => {
+            console.error('Xato:', error);
+            document.getElementById('loadingSpinner').style.display = 'none';
+            document.getElementById('noData').style.display = 'block';
+        });
+}
+
+// Qurilmalarni ko'rsatish
+function displayDevices(devices) {
+    document.getElementById('loadingSpinner').style.display = 'none';
+    document.getElementById('tableContainer').style.display = 'block';
+
+    const tableBody = document.getElementById('devicesTableBody');
+    tableBody.innerHTML = '';
+
+    if (devices.length === 0) {
+        document.getElementById('tableContainer').style.display = 'none';
+        document.getElementById('noData').style.display = 'block';
+        return;
+    }
+
+    devices.forEach(device => {
+        const statusBadge = getStatusBadge(device.status);
+        const typeName = getTypeName(device.type);
+
+        const row = `
+            <tr>
+                <td><strong>${device.inventory_number}</strong></td>
+                <td>${device.name}</td>
+                <td><span class="badge bg-secondary">${typeName}</span></td>
+                <td><code>${device.serial_number}</code></td>
+                <td>${device.model}</td>
+                <td>${statusBadge}</td>
+                <td>${formatCurrency(device.price)}</td>
+                <td>
+                    <a href="/device/${device.inventory_number}/" class="btn btn-sm btn-primary">
+                        <i class="bi bi-eye"></i> Ko'rish
+                    </a>
+                </td>
+            </tr>
+        `;
+        tableBody.innerHTML += row;
+    });
+}
+
+// Grid ko'rinishini ko'rsatish
+function displayGrid(devices) {
+    const gridContainer = document.getElementById('gridContainer');
+    gridContainer.innerHTML = '';
+
+    if (devices.length === 0) {
+        return;
+    }
+
+    devices.forEach(device => {
+        const statusBadge = getStatusBadge(device.status);
+        const typeName = getTypeName(device.type);
+
+        const card = `
+            <div class="col-md-6 col-lg-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0">
+                            <i class="bi bi-cpu"></i> ${device.name}
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-2">
+                            <span class="text-muted">Inventar:</span>
+                            <strong>${device.inventory_number}</strong>
+                        </p>
+                        <p class="mb-2">
+                            <span class="text-muted">Serial:</span>
+                            <code>${device.serial_number}</code>
+                        </p>
+                        <p class="mb-2">
+                            <span class="text-muted">Turi:</span>
+                            <span class="badge bg-secondary">${typeName}</span>
+                        </p>
+                        <p class="mb-2">
+                            <span class="text-muted">Model:</span>
+                            ${device.model}
+                        </p>
+                        <p class="mb-2">
+                            <span class="text-muted">Holati:</span>
+                            ${statusBadge}
+                        </p>
+                        <p class="mb-3">
+                            <span class="text-muted">Narxi:</span>
+                            <strong>${formatCurrency(device.price)}</strong>
+                        </p>
+                    </div>
+                    <div class="card-footer bg-light">
+                        <a href="/device/${device.inventory_number}/" class="btn btn-sm btn-primary w-100">
+                            <i class="bi bi-eye"></i> Ko'rish
+                        </a>
+                    </div>
+                </div>
+            </div>
+        `;
+        gridContainer.innerHTML += card;
+    });
+}
+
+// Event listenerlarni sozlash
+function setupEventListeners() {
+    const searchInput = document.getElementById('searchInput');
+    const toggleViewBtn = document.getElementById('toggleView');
+    const tableContainer = document.getElementById('tableContainer');
+    const gridContainer = document.getElementById('gridContainer');
+
+    let isGridView = false;
+
+    searchInput.addEventListener('input', filterDevices);
+
+    toggleViewBtn.addEventListener('click', function() {
+        isGridView = !isGridView;
+        if (isGridView) {
+            tableContainer.style.display = 'none';
+            gridContainer.style.display = 'grid';
+            toggleViewBtn.innerHTML = '<i class="bi bi-table"></i> Jadval Ko\'rinishi';
+            const filtered = getFilteredDevices();
+            displayGrid(filtered);
+        } else {
+            tableContainer.style.display = 'block';
+            gridContainer.style.display = 'none';
+            toggleViewBtn.innerHTML = '<i class="bi bi-columns-gap"></i> Grid Ko\'rinishi';
+            const filtered = getFilteredDevices();
+            displayDevices(filtered);
+        }
+    });
+}
+
+// Qurilmalarni filterlash
+function filterDevices() {
+    const filtered = getFilteredDevices();
+    const isGridView = document.getElementById('gridContainer').style.display !== 'none';
+    
+    if (isGridView) {
+        displayGrid(filtered);
+    } else {
+        displayDevices(filtered);
+    }
+    
+    updateCounts(filtered.length);
+}
+
+// Filtrlangan qurilmalarni olish
+function getFilteredDevices() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+
+    return allDevices.filter(device => {
+        return !searchTerm || 
+            device.name.toLowerCase().includes(searchTerm) ||
+            device.inventory_number.toLowerCase().includes(searchTerm) ||
+            device.serial_number.toLowerCase().includes(searchTerm);
+    });
+}
+
+// Hisoblarni yangilash
+function updateCounts(filtered = null) {
+    const totalCount = allDevices.length;
+    const filteredCount = filtered !== null ? filtered : getFilteredDevices().length;
+
+    document.getElementById('totalCount').textContent = totalCount;
+    
+    if (filtered !== null && filtered < totalCount) {
+        document.getElementById('filterCount').textContent = 
+            `(Filtrlangan: ${filtered})`;
+    } else {
+        document.getElementById('filterCount').textContent = '';
+    }
+}
+
+// Holat badge
+function getStatusBadge(status) {
+    const badges = {
+        'active': '<span class="badge bg-success"><i class="bi bi-check-circle"></i> Faol</span>',
+        'inactive': '<span class="badge bg-warning"><i class="bi bi-exclamation-circle"></i> Novoqif</span>',
+        'broken': '<span class="badge bg-danger"><i class="bi bi-x-circle"></i> Buzilgan</span>'
+    };
+    return badges[status] || '<span class="badge bg-secondary">Noma\'lum</span>';
+}
+
+// Turi nomi
+function getTypeName(type) {
+    const types = {
+        'laptop': 'Noutbuk',
+        'desktop': 'Desktop',
+        'printer': 'Printer',
+        'monitor': 'Monitor',
+        'other': 'Boshqa'
+    };
+    return types[type] || type;
+}
+
+// Pulni formatlashtirish
+function formatCurrency(amount) {
+    return new Intl.NumberFormat('uz-UZ', {
+        style: 'currency',
+        currency: 'UZS'
+    }).format(amount);
+}
+</script>
+{% endblock %}

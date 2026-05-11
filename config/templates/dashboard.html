@@ -1,0 +1,566 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - UZTMK{% endblock %}
+
+{% block content %}
+<div class="mb-4 d-flex flex-column flex-lg-row justify-content-between gap-3 align-items-start">
+    <div>
+        <h1 class="display-5 fw-bold mb-2">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </h1>
+        <p class="text-muted mb-0">Barcha tayinlangan qurilmalar va ularning QR kodlari</p>
+    </div>
+    <div class="d-flex gap-2">
+
+        <button
+            id="printSelectedBtn"
+            class="btn btn-dark btn-lg"
+        >
+
+            <i class="bi bi-qr-code"></i>
+            QR Print
+
+        </button>
+
+        <a href="{% url 'export_excel' %}" class="btn btn-primary btn-lg">
+
+            <i class="bi bi-file-earmark-excel"></i>
+            Excel eksport
+
+        </a>
+
+        <a href="{% url 'devices_list' %}" class="btn btn-outline-secondary btn-lg">
+
+            <i class="bi bi-cpu"></i>
+            Qurilmalar
+
+        </a>
+
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm p-4 h-100">
+            <div class="text-muted mb-2">Jami Qurilmalar</div>
+            <div class="h2 fw-bold">{{ total_devices }}</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm p-4 h-100">
+            <div class="text-muted mb-2">Berilgan</div>
+            <div class="h2 fw-bold text-success">{{ assigned_devices }}</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm p-4 h-100">
+            <div class="text-muted mb-2">Omborda</div>
+            <div class="h2 fw-bold text-warning">{{ available_devices_count }}</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm p-4 h-100">
+            <div class="text-muted mb-2">Xodimlar</div>
+            <div class="h2 fw-bold text-info">{{ total_employees }}</div>
+        </div>
+    </div>
+</div>
+<div class="row g-4 mb-4">
+
+</div>
+<div class="card border-0 shadow-sm mb-4">
+
+    
+
+    <!-- Topshirish qo'shish formasi --> 
+    <div class="card border-0 shadow-sm mb-4">
+
+    <div class="card-header bg-light py-3">
+        <h5 class="mb-0 fw-bold">
+            <i class="bi bi-person-check"></i>
+            Qurilmani topshirish
+        </h5>
+    </div>
+
+    <div class="card-body">
+
+        <form id="assignmentForm" class="row g-3">
+
+            <!-- Qurilma -->
+            <div class="col-md-4">
+                <label class="form-label">Qurilma</label>
+
+                <select id="device" class="form-select" required>
+
+                    <option value="">Tanlang</option>
+
+                    {% for device in available_devices %}
+                        <option value="{{ device.id }}">
+                            {{ device.inventory_number }} - {{ device.name }}
+                        </option>
+                    {% endfor %}
+
+                </select>
+            </div>
+
+            <!-- FIO -->
+            <div class="col-md-4">
+                <label class="form-label">F.I.O</label>
+
+                <input
+                    type="text"
+                    id="full_name"
+                    class="form-control"
+                    required
+                >
+            </div>
+
+            <!-- Tabel -->
+            <div class="col-md-4">
+                <label class="form-label">Tabel raqam</label>
+
+                <input
+                    type="text"
+                    id="tabel_number"
+                    class="form-control"
+                    required
+                >
+            </div>
+
+            <!-- Bo'lim -->
+            <div class="col-md-4">
+                <label class="form-label">Bo'lim</label>
+
+                <input
+                    type="text"
+                    id="department"
+                    class="form-control"
+                    required
+                >
+            </div>
+
+            <!-- Izoh -->
+            <div class="col-md-8">
+                <label class="form-label">Izoh</label>
+
+                <input
+                    type="text"
+                    id="note"
+                    class="form-control"
+                >
+            </div>
+
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">
+
+                    <i class="bi bi-check-circle"></i>
+                    Topshirish
+
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+    
+    
+
+</div>
+    <div class="card-header bg-light py-3">
+        <h5 class="mb-0 fw-bold">
+            <i class="bi bi-plus-circle"></i> Qurilma qo'shish
+        </h5>
+    </div>
+
+    <div class="card-body">
+
+        <form id="deviceForm" class="row g-3">
+
+    
+            <div class="col-md-4">
+                <label class="form-label">Qurilma nomi</label>
+
+                <input
+                    type="text"
+                    id="device_name"
+                    class="form-control"
+                    required
+                >
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Serial raqam</label>
+
+                <input
+                    type="text"
+                    id="serial_number"
+                    class="form-control"
+                    required
+                >
+            </div>
+
+            <div class="col-12">
+                <button type="submit" class="btn btn-success">
+
+                    <i class="bi bi-save"></i>
+                    Saqlash
+
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-light py-3 border-bottom">
+        <div class="d-flex justify-content-between align-items-center flex-column flex-md-row gap-3">
+            <div>
+                <h5 class="mb-0 fw-bold">
+                    <i class="bi bi-list-check"></i> So'nggi Tayinlanishlar
+                </h5>
+                <p class="text-muted mb-0">Har bir qatorda topshirilgan sana va QR kodni yuklash tugmasi mavjud.</p>
+            </div>
+            <div class="input-group w-100 w-md-50">
+                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
+                <input id="searchInput" type="text" class="form-control border-start-0" placeholder="Inventar yoki tabel raqam bo'yicha qidirish...">
+            </div>
+        </div>
+    </div>
+    
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>
+                            <input type="checkbox" id="selectAll">
+                        </th>
+                        <th>Inventar</th>
+                        <th>Qurilma</th>
+                        <th>Serial Raqam</th>
+                        <th>Xodim</th>
+                        <th>Tabel</th>
+                        <th>Bo'lim</th> 
+                        <th>Topshirilgan Sana</th>
+                        <th>QR Kod</th>
+                        <th>Amal</th>
+                    </tr>
+                </thead>
+                <tbody id="dashboardTableBody">
+                    {% if assignments %}
+                        {% for assignment in assignments %}
+                            <tr>
+                                <td>
+
+                                    <input
+                                        type="checkbox"
+                                        class="qr-checkbox"
+                                        value="{{ assignment.device.id }}"
+                                    >
+
+                                </td>
+                                <td><strong>{{ assignment.device.inventory_number }}</strong></td>
+                                <td>{{ assignment.device.name }}</td>
+                                <td>
+                                        {{ assignment.device.serial_number }}
+                                    
+                                </td>
+                                <td>{{ assignment.employee.full_name }}</td>
+                                <td>{{ assignment.employee.tabel_number }}</td>
+                                <td>{{ assignment.employee.department }}</td>
+                                <td>{{ assignment.assigned_at|date:"d.m.Y" }}</td>
+                                <td>
+
+                                    {% if assignment.device.qr_code %}
+
+                                        <a
+                                            href="{{ assignment.device.qr_code.url }}"
+                                            download
+                                            class="btn btn-sm btn-outline-primary"
+                                        >
+
+                                            <i class="bi bi-download"></i>
+                                            Yuklash
+
+                                        </a>
+
+                                    {% else %}
+
+                                        <span class="text-muted">Yo'q</span>
+
+                                    {% endif %}
+
+                                </td>
+                                <td>
+
+                                    {% if assignment.device.status == 'assigned' %}
+
+                                        <button
+                                            class="btn btn-sm btn-danger return-btn"
+                                            data-id="{{ assignment.id }}"
+                                        >
+
+                                            <i class="bi bi-arrow-return-left"></i>
+
+                                            Qaytarish
+
+                                        </button>
+
+                                    {% endif %}
+
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">
+                                Tayinlanishlar topilmadi.
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const assignmentForm = document.getElementById('assignmentForm');
+
+if (assignmentForm) {
+
+    assignmentForm.addEventListener('submit', async function(e) {
+
+        e.preventDefault();
+
+        const data = {
+
+            device: document.getElementById('device').value,
+
+            full_name: document.getElementById('full_name').value,
+
+            tabel_number: document.getElementById('tabel_number').value,
+
+            department: document.getElementById('department').value,
+
+            note: document.getElementById('note').value
+        };
+
+        try {
+
+            const response = await fetch('/api/assignments/', {
+
+                method: 'POST',
+
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                },
+
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+
+                alert("Qurilma muvaffaqiyatli topshirildi!");
+
+                assignmentForm.reset();
+
+                location.reload();
+
+            } else {
+
+                const error = await response.json();
+
+                console.log(error);
+
+                alert(JSON.stringify(error));
+            }
+
+        } catch (err) {
+
+            console.log(err);
+
+            alert("Server bilan ulanishda xatolik");
+        }
+
+    });
+
+}
+
+
+
+    function getCSRFToken() {
+    return document.cookie.split('; ')
+        .find(row => row.startsWith('csrftoken'))
+        ?.split('=')[1];
+}
+    document.addEventListener('DOMContentLoaded', function() {
+        const deviceForm = document.getElementById('deviceForm');
+
+if (deviceForm) {
+
+    deviceForm.addEventListener('submit', async function(e) {
+
+        e.preventDefault();
+
+        const data = {
+          
+
+            name: document.getElementById('device_name').value,
+
+            serial_number: document.getElementById('serial_number').value,
+
+            status: 'warehouse'
+        };
+
+        try {
+
+            const response = await fetch('/api/devices/', {
+
+                method: 'POST',
+
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                },
+
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+
+                alert("Qurilma muvaffaqiyatli qo'shildi!");
+
+                deviceForm.reset();
+
+                location.reload();
+
+            } else {
+
+                const error = await response.json();
+
+                console.log(error);
+
+                alert(JSON.stringify(error));
+            }
+
+        } catch (err) {
+
+            console.log(err);
+
+            alert("Server bilan ulanishda xatolik");
+        }
+
+    });
+
+}
+        const searchInput = document.getElementById('searchInput');
+        const tableBody = document.getElementById('dashboardTableBody');
+
+        if (!searchInput || !tableBody) {
+            return;
+        }
+
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.trim().toLowerCase();
+            const rows = Array.from(tableBody.querySelectorAll('tr'));
+
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                const visible = !searchTerm || text.includes(searchTerm);
+                row.style.display = visible ? '' : 'none';
+            });
+        });
+    });
+
+    const returnButtons = document.querySelectorAll('.return-btn');
+
+    returnButtons.forEach(button => {
+
+        button.addEventListener('click', async function() {
+
+            const assignmentId = this.dataset.id;
+
+            const confirmed = confirm(
+                "Qurilma omborga qaytarilsinmi?"
+            );
+
+            if (!confirmed) return;
+
+            try {
+
+                const response = await fetch(
+
+                    `/api/assignments/${assignmentId}/return_device/`,
+
+                    {
+                        method: 'POST',
+
+                        headers: {
+                            'X-CSRFToken': getCSRFToken()
+                        }
+                    }
+                );
+
+                if (response.ok) {
+
+                    alert("Qurilma qaytarildi!");
+
+                    location.reload();
+
+                } else {
+
+                    alert("Xatolik yuz berdi");
+                }
+
+            } catch (err) {
+
+                console.log(err);
+
+                alert("Server bilan ulanishda xato");
+            }
+
+        });
+
+    });
+
+
+
+    const printBtn = document.getElementById('printSelectedBtn');
+
+if (printBtn) {
+
+    printBtn.addEventListener('click', function() {
+
+        const checked = document.querySelectorAll(
+            '.qr-checkbox:checked'
+        );
+
+        const ids = Array.from(checked).map(
+            el => el.value
+        );
+
+        if (ids.length === 0) {
+
+            alert("Qurilmalarni tanlang");
+
+            return;
+        }
+
+        window.open(
+            `/qr-print/?ids=${ids.join(',')}`,
+            '_blank'
+        );
+
+    });
+
+}
+</script>
+{% endblock %}

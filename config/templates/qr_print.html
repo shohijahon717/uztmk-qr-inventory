@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+
+{% block title %}QR Print - UZTMK{% endblock %}
+
+{% block content %}
+
+<style>
+
+    body{
+        background:#f5f7fb;
+    }
+
+    .print-container{
+        max-width:1200px;
+        margin:auto;
+        padding:30px 20px;
+    }
+
+    .topbar{
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        margin-bottom:30px;
+        gap:20px;
+        flex-wrap:wrap;
+    }
+
+    .topbar h1{
+        font-size:38px;
+        font-weight:700;
+        margin:0;
+    }
+
+    .topbar p{
+        margin:0;
+        color:#6c757d;
+    }
+
+    .print-btn{
+        border:none;
+        background:#111827;
+        color:white;
+        padding:16px 28px;
+        border-radius:14px;
+        font-size:18px;
+        font-weight:600;
+        cursor:pointer;
+        transition:.2s;
+    }
+
+    .print-btn:hover{
+        transform:translateY(-2px);
+    }
+
+    .qr-grid{
+        display:grid;
+        grid-template-columns:repeat(3, 1fr);
+        gap:20px;
+    }
+
+    .qr-card{
+        background:white;
+        border-radius:20px;
+        padding:25px;
+        text-align:center;
+        box-shadow:0 5px 20px rgba(0,0,0,.08);
+        border:1px solid #eee;
+    }
+
+    .qr-card img{
+        width:180px;
+        height:180px;
+        object-fit:contain;
+        margin-bottom:15px;
+    }
+
+    .inventory{
+        font-size:22px;
+        font-weight:700;
+        margin-bottom:6px;
+    }
+
+    .device-name{
+        font-size:16px;
+        color:#6c757d;
+        margin-bottom:8px;
+    }
+
+    .serial{
+        font-size:14px;
+        color:#999;
+        word-break:break-word;
+    }
+
+    @media print {
+
+        @page{
+            size:A4;
+            margin:10mm;
+        }
+
+        body{
+            background:white;
+        }
+
+        .topbar{
+            display:none;
+        }
+
+        .print-container{
+            padding:0;
+            margin:0;
+            max-width:100%;
+        }
+
+        .qr-grid{
+            gap:12px;
+        }
+
+        .qr-card{
+            box-shadow:none;
+            border:1px solid #ddd;
+            break-inside:avoid;
+            page-break-inside:avoid;
+        }
+
+    }
+
+</style>
+
+<div class="print-container">
+
+    <div class="topbar">
+
+        <div>
+            <h1>
+                <i class="bi bi-qr-code"></i>
+                QR Print
+            </h1>
+
+            <p>
+                Tanlangan qurilmalarning QR kodlari
+            </p>
+        </div>
+
+        <button
+            onclick="window.print()"
+            class="print-btn"
+        >
+            <i class="bi bi-printer"></i>
+            Chop etish
+        </button>
+
+    </div>
+
+    <div class="qr-grid">
+
+        {% for device in devices %}
+
+            <div class="qr-card">
+
+                {% if device.qr_code %}
+
+                    <img
+                        src="{{ device.qr_code.url }}"
+                        alt="QR"
+                    >
+
+                {% endif %}
+
+                <div class="inventory">
+                    {{ device.inventory_number }}
+                </div>
+
+                <div class="device-name">
+                    {{ device.name }}
+                </div>
+
+                <div class="serial">
+                    Serial: {{ device.serial_number }}
+                </div>
+
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+{% endblock %}
