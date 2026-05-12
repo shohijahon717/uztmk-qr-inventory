@@ -88,6 +88,11 @@ class EmployeeViewSet(viewsets.ModelViewSet):
 
 
 class DeviceViewSet(viewsets.ModelViewSet):
+
+    queryset = Device.objects.all().order_by('-id')
+
+    serializer_class = DeviceSerializer
+
     def perform_create(self, serializer):
 
         device = serializer.save()
@@ -95,9 +100,6 @@ class DeviceViewSet(viewsets.ModelViewSet):
         generate_qr(device)
 
         device.save()
-    queryset = Device.objects.all()
-    serializer_class = DeviceSerializer
-    
 
 class AssignmentViewSet(viewsets.ModelViewSet):
     queryset = Assignment.objects.all()

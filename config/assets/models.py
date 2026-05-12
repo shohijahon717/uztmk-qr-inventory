@@ -29,18 +29,30 @@ class Device(models.Model):
     blank=True,
     null=True
     )
+    description = models.TextField(
+        blank=True,
+        null=True
+    )
+    old_inventory_number = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True
+    )
     def save(self, *args, **kwargs):
 
         if not self.inventory_number:
 
-            last_device = Device.objects.order_by('-inventory_number').first()
+            last_device = Device.objects.order_by('-id').first()
 
-            if last_device:
+            if last_device and last_device.inventory_number.isdigit():
+
                 new_number = int(last_device.inventory_number) + 1
-            else:
-                new_number = 100000
 
-            self.inventory_number = str(new_number)
+            else:
+
+                new_number = 1
+
+            self.inventory_number = str(new_number).zfill(6)
 
         super().save(*args, **kwargs)
 
