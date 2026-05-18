@@ -22,7 +22,9 @@ class Device(models.Model):
         blank=True
     )
 
-    name = models.CharField(max_length=255)
+    name = models.CharField(
+        max_length=255
+    )
 
     serial_number = models.CharField(
         max_length=255
@@ -51,6 +53,10 @@ class Device(models.Model):
         null=True
     )
 
+    is_auto_inventory = models.BooleanField(
+        default=False
+    )
+
     def save(self, *args, **kwargs):
 
         if not self.inventory_number:
@@ -58,54 +64,60 @@ class Device(models.Model):
             # Eski inventar berilgan bo'lsa
             if self.old_inventory_number:
 
-                normalized = (
-                    self.old_inventory_number.strip()
-                )
+                normalized = self.old_inventory_number.strip()
 
-                # 1222 → 001222
                 if normalized.isdigit():
                     normalized = normalized.zfill(6)
 
-                # Takrorligini tekshirish
                 if Device.objects.filter(
                     inventory_number=normalized
                 ).exists():
 
                     raise ValidationError(
-                        f"{normalized} inventar allaqachon mavjud"
+                        f"{normalized} inventar mavjud"
                     )
 
                 self.inventory_number = normalized
+                self.is_auto_inventory = False
 
             else:
 
-                # Faqat 6 xonali avto inventarlarni olish
+                # Faqat avtomatik yaratilganlarni olish
                 auto_devices = Device.objects.filter(
-                    inventory_number__regex=r'^\d{6}$'
+                    is_auto_inventory=True
                 )
 
                 if auto_devices.exists():
 
                     last_number = max(
-                        int(device.inventory_number)
-                        for device in auto_devices
+                        int(d.inventory_number)
+                        for d in auto_devices
+                        if d.inventory_number.isdigit()
                     )
 
                     new_number = last_number + 1
 
                 else:
-
                     new_number = 1
+
+                # Band bo'lsa keyingisini qidiradi
+                while Device.objects.filter(
+                    inventory_number=str(new_number).zfill(6)
+                ).exists():
+
+                    new_number += 1
 
                 self.inventory_number = (
                     str(new_number).zfill(6)
                 )
 
-        super().save(*args, **kwargs)
+                self.is_auto_inventory = True
 
+        super().save(*args, **kwargs)
     def __str__(self):
-        return self.inventory_number    
+        return f"{self.inventory_number} - {self.name}"
     
+
 class Assignment(models.Model):
     device = models.ForeignKey(Device, on_delete=models.CASCADE)
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
