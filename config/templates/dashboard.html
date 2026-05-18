@@ -422,8 +422,7 @@
                             <input type="checkbox" id="selectAll">
                         </th>
 
-                        <th>Inventar</th>
-                        <th>Eski INV</th>
+                        <th>Inventar</th>              
                         <th>Qurilma</th>
                         <th>Serial</th>
                         <th>Xodim</th>
@@ -459,19 +458,7 @@
                             </strong>
                         </td>
 
-                        <td>
-
-                            {% if assignment.device.old_inventory_number %}
-
-                                {{ assignment.device.old_inventory_number }}
-
-                            {% else %}
-
-                                -
-
-                            {% endif %}
-
-                        </td>
+                       
 
                         <td>
                             {{ assignment.device.name }}
